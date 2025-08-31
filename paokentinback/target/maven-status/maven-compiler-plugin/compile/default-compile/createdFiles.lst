@@ -1,0 +1,8 @@
+com\paokentin\model\entities\Fornada.class
+com\paokentin\model\entities\Pao.class
+com\paokentin\model\repositories\PaoRepository.class
+com\paokentin\model\repositories\FornadaRepository.class
+com\paokentin\restcontrollers\FornadaController.class
+com\paokentin\restcontrollers\PaoController.class
+com\paokentin\model\repositories\ConnectionManager.class
+com\paokentin\PaokentinApplication.class

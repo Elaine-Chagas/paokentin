@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PãoKentin - Tela do Cliente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .pao-card {
+            border-left: 8px solid;
+        }
+    </style>
+</head>
+<body class="p-4 bg-light">
+
+    <div class="container">
+        <h1 class="mb-4 text-center">Pães Quentinhos!</h1>
+        <p class="lead text-center text-muted">Acompanhe as últimas fornadas da sua padaria.</p>
+        <hr>
+
+        <div id="cards-container" class="row"></div>
+    </div>
+
+    <script>
+        async function carregarFornadas() {
+            try {
+                const response = await fetch("http://localhost:8080/fornada");
+                const fornadas = await response.json();
+                const container = document.getElementById("cards-container");
+                
+                container.innerHTML = ""; // Limpa o container
+                
+                if (fornadas.length === 0) {
+                    container.innerHTML = `<p class="text-center text-muted w-100">Nenhuma fornada registrada ainda.</p>`;
+                    return;
+                }
+
+                fornadas.forEach(fornada => {
+                    const col = document.createElement("div");
+                    col.classList.add("col-md-4", "mb-4");
+                    
+                    const inicio = new Date(fornada.dataHoraInicio);
+                    const tempoTotalMs = fornada.pao.tempoPreparo * 60 * 1000;
+                    const tempoDecorridoMs = Date.now() - inicio.getTime();
+                    const tempoRestanteMs = tempoTotalMs - tempoDecorridoMs;
+                    
+                    const statusText = tempoRestanteMs > 0 ? "Em Produção" : "Pronto!";
+                    const statusColor = tempoRestanteMs > 0 ? "text-warning" : "text-success";
+                    
+                    const cardHtml = `
+                        <div class="card pao-card shadow-sm" style="border-color: ${fornada.pao.cor};">
+                            <div class="card-body">
+                                <h5 class="card-title">${fornada.pao.descricao}</h5>
+                                <h6 class="card-subtitle mb-2 ${statusColor}">${statusText}</h6>
+                                <p class="card-text">
+                                    <strong>Início da Fornada:</strong> ${inicio.toLocaleTimeString('pt-BR')}<br/>
+                                    <strong>Tempo de Preparo:</strong> ${fornada.pao.tempoPreparo} min
+                                </p>
+                                <div id="timer-${fornada.codigo}"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    col.innerHTML = cardHtml;
+                    container.appendChild(col);
+
+                    if (tempoRestanteMs > 0) {
+                        const timerElement = document.getElementById(`timer-${fornada.codigo}`);
+                        
+                        const updateTimer = () => {
+                            const agoraMs = Date.now();
+                            const tempoDecorridoMs = agoraMs - inicio.getTime();
+                            const tempoFaltandoMs = Math.max(0, tempoTotalMs - tempoDecorridoMs);
+
+                            const minutos = Math.floor(tempoFaltandoMs / 1000 / 60);
+                            const segundos = Math.floor((tempoFaltandoMs / 1000) % 60);
+
+                            timerElement.innerHTML = `<strong>Falta:</strong> ${minutos} min ${segundos} seg`;
+
+                            if (tempoFaltandoMs <= 0) {
+                                clearInterval(intervalo);
+                                timerElement.innerHTML = `<strong>Pronto!</strong>`;
+                                location.reload();
+                            }
+                        };
+                        
+                        updateTimer();
+                        const intervalo = setInterval(updateTimer, 1000);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar as fornadas:", error);
+                const container = document.getElementById("cards-container");
+                container.innerHTML = `<p class="text-center text-danger w-100">Não foi possível conectar ao servidor. Verifique se o back-end está rodando.</p>`;
+            }
+        }
+
+        carregarFornadas();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PãoKentin - Dono da Padaria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+    <div class="container">
+        <h1 class="mb-4">Gerenciar Tipos de Pão</h1>
+
+        <div class="card mb-4">
+            <div class="card-header">Cadastrar Novo Pão</div>
+            <div class="card-body">
+                <form action="#" submitter="http://localhost:8080/pao POST">
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição:</label>
+                        <input type="text" name="descricao" id="descricao" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tempoPreparo" class="form-label">Tempo de Preparo (minutos):</label>
+                        <input type="number" name="tempoPreparo" id="tempoPreparo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cor" class="form-label">Cor:</label>
+                        <input type="color" name="cor" id="cor" class="form-control form-control-color">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Pães Cadastrados</div>
+            <div class="card-body">
+                <table id="tblPaes" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Tempo de Preparo</th>
+                            <th>Cor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="submitter.js"></script>
+    <script>
+        async function carregarPaes() {
+            const response = await fetch("http://localhost:8080/pao");
+            const paes = await response.json();
+            const tabela = document.getElementById("tblPaes").getElementsByTagName('tbody')[0];
+            
+            tabela.innerHTML = ""; // Limpa a tabela
+            
+            paes.forEach(pao => {
+                let row = tabela.insertRow();
+                row.insertCell(0).innerText = pao.codigo;
+                row.insertCell(1).innerText = pao.descricao;
+                row.insertCell(2).innerText = pao.tempoPreparo + " min";
+                row.insertCell(3).innerHTML = `<div style="background-color:${pao.cor}; width: 30px; height: 30px; border-radius: 5px;"></div>`;
+            });
+        }
+        
+        carregarPaes();
+    </script>
+</body>
+</html>

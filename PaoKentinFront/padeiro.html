@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PãoKentin - Tela do Padeiro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+
+    <div class="container text-center">
+        <h1 class="mb-4">Registro de Fornadas</h1>
+        <p class="lead">Clique no pão que acabou de ir para o forno!</p>
+        <hr>
+
+        <div id="botoes-pao" class="d-flex flex-wrap justify-content-center"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Função para carregar os pães e criar os botões
+        async function carregarPaoETeste() {
+            try {
+                const response = await fetch("http://localhost:8080/pao");
+                const paes = await response.json();
+                
+                const botoesContainer = document.getElementById("botoes-pao");
+
+                paes.forEach(pao => {
+                    const button = document.createElement("button");
+                    button.classList.add("btn", "btn-lg", "text-white", "m-2");
+                    button.style.backgroundColor = pao.cor;
+                    button.innerText = pao.descricao;
+
+                    // Evento de clique para registrar a fornada
+                    button.addEventListener("click", async function() {
+                        const dadoQueVaiSerEnviado = { codigo: pao.codigo };
+
+                        try {
+                            const fornadaResponse = await fetch("http://localhost:8080/fornada", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(dadoQueVaiSerEnviado)
+                            });
+
+                            if (!fornadaResponse.ok) {
+                                throw new Error("Erro na resposta do servidor");
+                            }
+
+                            // Agora tratamos como JSON (vem o objeto Fornada do back-end)
+                            const json = await fornadaResponse.json();
+
+                            alert(
+                                "Fornada cadastrada!\n\n" +
+                                "Pão: " + json.pao.descricao + "\n" +
+                                "Início: " + new Date(json.dataHoraInicio).toLocaleTimeString("pt-BR")
+                            );
+
+                            location.reload();
+
+                        } catch (error) {
+                            alert("Não foi possível registrar a fornada. Tente novamente.");
+                            console.error("Erro:", error);
+                        }
+                    });
+
+                    botoesContainer.appendChild(button);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar os pães:", error);
+                const mensagemErro = document.createElement("p");
+                mensagemErro.innerText = "Não foi possível carregar os tipos de pão. Verifique se o servidor está rodando.";
+                document.body.appendChild(mensagemErro);
+            }
+        }
+
+        carregarPaoETeste();
+    </script>
+</body>
+</html>
