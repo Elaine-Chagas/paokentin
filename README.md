@@ -1,2 +1,2 @@
 # paokentin
-Projeto PãoKentin para a disciplina de Desenvolvimento Web 2
+Projeto PaoKentin para a disciplina de Desenvolvimento Web 2
